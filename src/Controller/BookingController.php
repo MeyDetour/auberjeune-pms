@@ -183,9 +183,32 @@ class BookingController extends AbstractController
         return $this->json(["isThereBunkBed" => $isThereBunkBed], 200);
     }
 
+    #[Route('/bookings/get/all', name: 'all_booking', methods: 'get')]
+    public function getAll(BookingRepository $repository): Response
+    {
+        return $this->json($repository->findAll(), 200, [], ['groups' => ['entireBooking']]);
+    }
 
-    #[Route('/booking/new', name: 'new_booking')]
-    public function new(Request $request, EntityManagerInterface $manager, SerializerInterface $serializer): Response
+    #[Route('/bookings/get/new', name: 'waiting_booking', methods: 'get')]
+    public function getAllWaiting(BookingRepository $repository): Response
+    {
+        return $this->json($repository->findBy(['advencement' => "waiting"]), 200, [], ['groups' => ['entireBooking']]);
+    }
+
+    #[Route('/bookings/get/progress', name: 'progress_booking', methods: 'get')]
+    public function getAllProgress(BookingRepository $repository): Response
+    {
+        return $this->json($repository->findBy(['advencement' => "progress"]), 200, [], ['groups' => ['entireBooking']]);
+    }
+
+    #[Route('/bookings/get/done', name: 'done_booking', methods: 'get')]
+    public function getAllDone(BookingRepository $repository): Response
+    {
+        return $this->json($repository->findBy(['advencement' => "done"]), 200, [], ['groups' => ['entireBooking']]);
+    }
+
+    #[Route('/booking/new', name: 'new_booking', methods: 'post')]
+    public function new(Request $request, EntityManagerInterface $manager, RoomRepository $roomRepository, BedRepository $bedRepository, SerializerInterface $serializer): Response
     {
         $booking = $serializer->deserialize($request->getContent(), Booking::class, 'json');
 
@@ -197,12 +220,21 @@ class BookingController extends AbstractController
         if ($booking->getPhoneNumber() == null) {
             return $this->json(["message" => "Enter an valid email.", 406]);
         }
+        if ($booking->getStartDate() >= $booking->getEndDate()) {
+            return $this->json(["message" => "start date must be inferior as end start date.", 406]);
+        }
+        if ($booking->getWantPrivateRoom() == null) {
+            return $this->json(["message" => "Client wants private room ?", 406]);
+        }
+
+        /*   if (new \DateTime() >= $booking->getStartDate()) {
+               return $this->json(["message" => "Start date must be in the future", 406]);
+           }*/
 
         $isThereMajor = false;
         $today = new Datetime();
         foreach ($booking->getClients() as $client) {
             $age = $today->diff($client->getBirthDate())->y;
-
             if (18 <= $age) {
                 $isThereMajor = True;
             }
@@ -218,6 +250,13 @@ class BookingController extends AbstractController
         $booking->setPrice((count($booking->getClients()) * 50));
         //price is calculated
         //bed are associated
+        $beds = $this->correspondingBeds($roomRepository, $bedRepository, $booking, $booking->getWantPrivateRoom());
+        if (count($beds) == 0) {
+            return $this->json(["message" => "There is no place for you groupe criters", 406]);
+        }
+        foreach ($beds as $bed) {
+            $booking->addBed($bed);
+        }
         $manager->persist($booking);
         $manager->flush();
         return $this->json($booking, 201, [], ['groups' => ['entireBooking']]);
@@ -244,7 +283,7 @@ class BookingController extends AbstractController
         if ($bookingEdited->isPaid() != null) {
             $booking->setPaid($bookingEdited->isPaid());
         }
-        if ($bookingEdited->isPaid() != null) {
+        if ($bookingEdited->getAdvencement() != null) {
             $booking->setAdvencement($bookingEdited->getAdvencement());
         }
         $manager->persist($booking);
@@ -253,7 +292,7 @@ class BookingController extends AbstractController
 
     }
 
-    #[Route('/booking/finish/{id}', name: 'finish_booking')]
+    #[Route('/booking/finish/{id}', name: 'finish_booking', methods: 'patch')]
     public function finishBooking(Booking $booking, EntityManagerInterface $manager): Response
     {
 
@@ -286,10 +325,126 @@ class BookingController extends AbstractController
                 "message" => "Internal Server Error"],
                 200);
         }
+        $manager->remove($booking);
+        $manager->flush();
         return $this->json([
             "state" => false,
-            "message" => "You can't delete it"],
+            "message" => "ok"],
             200);
+    }
+
+    public function countBedFreeInRoom($room, $startDateOfBooking, $endDateOfBooking): array
+    {
+        $count = 0;
+        $beds = [];
+        foreach ($room->getBeds() as $bed) {
+            if (count($bed->getBookings()) == 0) {
+                $count++;
+                if ($bed->isDoubleBed()) {
+                    $count++;
+                }
+                $beds[] = $bed;
+            }
+            foreach ($bed->getBookings() as $booking) {
+                $startDate = $booking->getEndDate();
+                $endDate = $booking->getStartDate();
+                if (
+                    (clone $endDate->modify('+1 day')) < $startDateOfBooking ||
+                    (clone $endDateOfBooking)->modify('+1 day') < $startDate
+                ) {
+                    $count++;
+                    if ($bed->isDoubleBed()) {
+                        $count++;
+                    }
+                    $beds[] = $bed;
+                }
+
+            }
+
+
+        }
+        return ['count' => $count, 'beds' => $beds];
+
+    }
+
+    private function correspondingBeds(RoomRepository $roomRepository, BedRepository $bedRepository, Booking $booking, $wantPrivateRoom): array
+    {
+        $beds = [];
+        if (!$wantPrivateRoom) {
+            $rooms = $roomRepository->findBy(['isPrivate' => false]);
+            $hasOneRoomForThisGroup = false;
+            foreach ($rooms as $room) {
+
+                //calculte only if we dont found one
+                if (!$hasOneRoomForThisGroup) {
+                    $result = $this->countBedFreeInRoom($room, $booking->getStartDate(), $booking->getEndDate());
+                    $count = $result['count'];
+
+                    if ($count >= count($booking->getClients())) {
+                        $hasOneRoomForThisGroup = true;
+                        $beds = array_slice($result['beds'], 0, count($booking->getClients()));
+                    }
+
+                }
+            }
+
+            //search if we have place for group in different room
+            if (!$hasOneRoomForThisGroup) {
+                $count = 0;
+                foreach ($rooms as $room) {
+
+                    if (!$hasOneRoomForThisGroup) {
+                        $result = $this->countBedFreeInRoom($room, $booking->getStartDate(), $booking->getEndDate());
+                        if ($count + $result['count'] >= count($booking->getClients())) {
+                            $beds[] = array_slice($result['beds'], 0, count($booking->getClients()) - count($count) - 1);
+                            $hasOneRoomForThisGroup = true;
+                        } else {
+                            $beds[] = $result['beds'];
+                            $count += $result['count'];
+                        }
+
+                    }
+                }
+            }
+        }
+        //count max size for private room
+        if ($wantPrivateRoom and count($booking->getClients()) <= 5) {
+
+            foreach ($roomRepository->findBy(['isPrivate' => true]) as $room) {
+
+                if (count($beds) == 0 && $room->getBedNumber() == count($booking->getClients())) {
+                    $bedsBoolean = [];
+
+                    $bedsfreeinthisroom = [];
+                    foreach ($room->getBeds() as $bed) {
+                        $isBedFree = false;
+                        foreach ($bed->getBookings() as $booking) {
+                            $startDate = $booking->getEndDate();
+                            $endDate = $booking->getStartDate();
+                            if (
+                                (clone $endDate->modify('+1 day')) < $booking->getStartDate() ||
+                                (clone $booking->getEndDate())->modify('+1 day') < $startDate
+                            ) {
+                                $isBedFree = true;
+                            }
+                        }
+                        if(count($bed->getBookings())==0){
+                            $isBedFree = true;
+                        }
+                        $bedsBoolean[] = $isBedFree;
+                        if ($isBedFree) {
+                            $bedsfreeinthisroom[] = $bed;
+                        }
+                    }
+                    if (!in_array(false,$bedsBoolean )) {
+                        $beds = $bedsfreeinthisroom;
+                    }
+                }
+            }
+        }
+
+        return $beds;
+
     }
 
 }

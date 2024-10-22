@@ -44,6 +44,26 @@ class Room
     #[Groups(['rooms_and_bed'])]
     private Collection $beds;
 
+    #[ORM\Column]
+    #[Groups(['rooms','rooms_and_bed'])]
+    private ?bool $hasTable = null;
+
+    #[ORM\Column]
+    #[Groups(['rooms','rooms_and_bed'])]
+    private ?bool $hasBalcony = null;
+
+    #[ORM\Column]
+    #[Groups(['rooms','rooms_and_bed'])]
+    private ?bool $hasWashtub = null;
+
+    #[ORM\Column]
+    #[Groups(['rooms','rooms_and_bed'])]
+    private ?bool $hasBin = null;
+
+    #[ORM\Column]
+    #[Groups(['rooms','rooms_and_bed'])]
+    private ?bool $hasWardrobe = null;
+
     public function __construct()
     {
         $this->beds = new ArrayCollection();
@@ -132,5 +152,77 @@ class Room
         }
 
         return $this;
+    }
+
+    public function hasTable(): ?bool
+    {
+        return $this->hasTable;
+    }
+
+    public function setHasTable(bool $hasTable): static
+    {
+        $this->hasTable = $hasTable;
+
+        return $this;
+    }
+
+    public function hasBalcony(): ?bool
+    {
+        return $this->hasBalcony;
+    }
+
+    public function setHasBalcony(bool $hasBalcony): static
+    {
+        $this->hasBalcony = $hasBalcony;
+
+        return $this;
+    }
+
+    public function hasWashtub(): ?bool
+    {
+        return $this->hasWashtub;
+    }
+
+    public function setHasWashtub(bool $hasWashtub): static
+    {
+        $this->hasWashtub = $hasWashtub;
+
+        return $this;
+    }
+
+    public function hasBin(): ?bool
+    {
+        return $this->hasBin;
+    }
+
+    public function setHasBin(bool $hasBin): static
+    {
+        $this->hasBin = $hasBin;
+
+        return $this;
+    }
+
+    public function hasWardrobe(): ?bool
+    {
+        return $this->hasWardrobe;
+    }
+
+    public function setHasWardrobe(bool $hasWardrobe): static
+    {
+        $this->hasWardrobe = $hasWardrobe;
+
+        return $this;
+    }
+    public function getBedNumber(): ?bool
+    {
+        $count = 0;
+        foreach ($this->beds as $bed){
+            if($bed->isDoubleBed()){
+                $count += 2;
+            }else{
+                $count++;
+            }
+        }
+        return $count;
     }
 }

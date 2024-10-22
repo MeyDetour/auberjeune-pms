@@ -42,6 +42,11 @@ class AppFixtures extends Fixture
             $room->setPrivate(false);
             $room->setHasLocker(false);
             $room->setHasPrivateShowerroom(false);
+            $room->setHasTable(false);
+            $room->setHasBalcony(false);
+            $room->setHasWashtub(false);
+            $room->setHasBin(false);
+            $room->setHasWardrobe(false);
             $manager->persist($room);
             $manager->flush();
 
@@ -55,6 +60,7 @@ class AppFixtures extends Fixture
                 $bed->setHasLamp(false);
                 $bed->setHasLittleStorage(false);
                 $bed->setHasShelf(false);
+                $bed->setOccupied(false);
                 $bed->setRoom($room);
                 $manager->persist($bed);
                 $count++;

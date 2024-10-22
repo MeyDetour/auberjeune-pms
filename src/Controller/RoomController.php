@@ -18,9 +18,10 @@ class RoomController extends AbstractController
     #[Route('/rooms', name: 'app_rooms', methods: ['GET'])]
     public function index(RoomRepository $roomRepository): Response
     {
-        $rooms = $roomRepository->findBy([],['name'=>'ASC']);
+        $rooms = $roomRepository->findBy([], ['name' => 'ASC']);
         return $this->json($rooms, 200, [], ['groups' => ['rooms_and_bed']]);
     }
+
     #[Route('/room/new', name: 'new_room', methods: ['POST'])]
     public function new(Request $request, SerializerInterface $serializer, EntityManagerInterface $entityManager): Response
     {
@@ -33,6 +34,21 @@ class RoomController extends AbstractController
         }
         if (!is_bool($room->isPrivate())) {
             return $this->json(["message" => "Is the room private ?"], 406, [], ['groups' => 'rooms']);
+        }
+        if (!is_bool($room->hasTable())) {
+            return $this->json(["message" => "Has the a table ?"], 406, [], ['groups' => 'rooms']);
+        }
+        if (!is_bool($room->hasBalcony())) {
+            return $this->json(["message" => "Has the room a balcony ?"], 406, [], ['groups' => 'rooms']);
+        }
+        if (!is_bool($room->hasWashtub())) {
+            return $this->json(["message" => "Has the room a washtub ?"], 406, [], ['groups' => 'rooms']);
+        }
+        if (!is_bool($room->hasBin())) {
+            return $this->json(["message" => "has the room a bin?"], 406, [], ['groups' => 'rooms']);
+        }
+        if (!is_bool($room->hasWardrobe())) {
+            return $this->json(["message" => "Has the room a wardrobe ?"], 406, [], ['groups' => 'rooms']);
         }
 
 
@@ -61,11 +77,30 @@ class RoomController extends AbstractController
         if (!is_bool($room2->isPrivate())) {
             return $this->json(["message" => "Is the room private ?"], 406, [], ['groups' => 'rooms']);
         }
-
+        if (!is_bool($room->hasTable())) {
+            return $this->json(["message" => "Has the a table ?"], 406, [], ['groups' => 'rooms']);
+        }
+        if (!is_bool($room->hasBalcony())) {
+            return $this->json(["message" => "Has the room a balcony ?"], 406, [], ['groups' => 'rooms']);
+        }
+        if (!is_bool($room->hasWashtub())) {
+            return $this->json(["message" => "Has the room a washtub ?"], 406, [], ['groups' => 'rooms']);
+        }
+        if (!is_bool($room->hasBin())) {
+            return $this->json(["message" => "has the room a bin?"], 406, [], ['groups' => 'rooms']);
+        }
+        if (!is_bool($room->hasWardrobe())) {
+            return $this->json(["message" => "Has the room a wardrobe ?"], 406, [], ['groups' => 'rooms']);
+        }
         $room->setName($room2->getName());
         $room->setPrivate($room2->isPrivate());
         $room->setHasLocker($room2->hasLocker());
         $room->setHasPrivateShowerroom($room2->hasPrivateShowerroom());
+        $room->setHasTable($room2->hasTable());
+        $room->setHasBalcony($room2->hasBalcony());
+        $room->setHasWashtub($room2->hasWashtub());
+        $room->setHasBin($room2->hasBin());
+        $room->setHasWardrobe($room2->hasWardrobe());
 
         try {
             $entityManager->persist($room);

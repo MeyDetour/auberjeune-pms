@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use App\Service\DateService;
+use phpDocumentor\Reflection\Types\Boolean;
 use Symfony\Component\Serializer\Annotation as Serializer;
 use App\Repository\BookingRepository;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -18,15 +20,15 @@ class Booking
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['entireBooking'])]
+    #[Groups(['entireBooking','bed', 'rooms_and_bed'])]
     private ?int $id = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    #[Groups(['entireBooking'])]
+    #[Groups(['entireBooking','bed', 'rooms_and_bed'])]
     private ?\DateTimeInterface $startDate = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    #[Groups(['entireBooking'])]
+    #[Groups(['entireBooking','bed', 'rooms_and_bed'])]
     private ?\DateTimeInterface $endDate = null;
 
     #[ORM\Column]
@@ -35,11 +37,11 @@ class Booking
     private ?\DateTimeImmutable $createdAt = null;
 
     #[ORM\Column(type: Types::TEXT)]
-    #[Groups(['entireBooking'])]
+    #[Groups(['entireBooking','bed', 'rooms_and_bed'])]
     private ?string $phoneNumber = null;
 
     #[ORM\Column(type: Types::TEXT)]
-    #[Groups(['entireBooking'])]
+    #[Groups(['entireBooking','bed', 'rooms_and_bed'])]
     private ?string $mail = null;
 
     #[ORM\Column]
@@ -50,6 +52,7 @@ class Booking
      * @var Collection<int, Bed>
      */
     #[ORM\ManyToMany(targetEntity: Bed::class, inversedBy: 'bookings')]
+    #[Groups(['entireBooking'])]
     private Collection $beds;
 
     #[ORM\Column]
@@ -64,17 +67,20 @@ class Booking
     #[Groups(['entireBooking'])]
     private ?string $advencement = null;
 
+
     /**
      * @var Collection<int, Client>
      */
     #[ORM\ManyToMany(targetEntity: Client::class, mappedBy: 'booking',cascade:['persist'])]
     #[Groups(['entireBooking'])]
     private Collection $clients;
+
+    #[ORM\Column]
+    private ?bool $wantPrivateRoom = null;
     //refund,progress,done,waiting
 
     public function __construct()
-    {
-        $this->beds = new ArrayCollection();
+    {    $this->beds = new ArrayCollection();
         $this->clients = new ArrayCollection();
     }
 
@@ -85,7 +91,7 @@ class Booking
 
     public function getStartDate(): ?\DateTimeInterface
     {
-        return $this->startDate;
+        return  $this->startDate;
     }
 
     public function setStartDate(\DateTimeInterface $startDate): static
@@ -97,7 +103,7 @@ class Booking
 
     public function getEndDate(): ?\DateTimeInterface
     {
-        return $this->endDate;
+        return  $this->endDate;
     }
 
     public function setEndDate(\DateTimeInterface $endDate): static
@@ -238,6 +244,18 @@ class Booking
         if ($this->clients->removeElement($client)) {
             $client->removeBooking($this);
         }
+
+        return $this;
+    }
+
+    public function getWantPrivateRoom(): ?string
+    {
+        return $this->wantPrivateRoom;
+    }
+
+    public function setWantPrivateRoom(string $wantPrivateRoom): static
+    {
+        $this->wantPrivateRoom = $wantPrivateRoom;
 
         return $this;
     }

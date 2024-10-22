@@ -16,16 +16,16 @@ class Bed
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['bed','rooms_and_bed'])]
+    #[Groups(['bed', 'rooms_and_bed', 'entireBooking'])]
     private ?int $id = null;
 
 
     #[ORM\Column]
-    #[Groups(['bed','rooms_and_bed'])]
+    #[Groups(['bed', 'rooms_and_bed'])]
     private ?bool $isSittingApart = null;
 
     #[ORM\Column(type: Types::TEXT)]
-    #[Groups(['bed','rooms_and_bed'])]
+    #[Groups(['bed', 'rooms_and_bed', 'entireBooking'])]
     private ?string $state = null;
     //blocked, cleaned, inspected, notcleaned
 
@@ -35,7 +35,7 @@ class Bed
     private ?Room $room = null;
 
     #[ORM\Column(unique: true)]
-    #[Groups(['bed','rooms_and_bed'])]
+    #[Groups(['bed', 'rooms_and_bed', 'entireBooking'])]
     private ?int $number = null;
 
     #[ORM\ManyToOne(inversedBy: 'bedsCleaned')]
@@ -47,29 +47,30 @@ class Bed
     private ?User $inspectedBy = null;
 
     #[ORM\Column]
-    #[Groups(['bed','rooms_and_bed'])]
+    #[Groups(['bed', 'rooms_and_bed'])]
     private ?bool $isDoubleBed = null;
 
     #[ORM\Column(nullable: true)]
-    #[Groups(['bed','rooms_and_bed'])]
+    #[Groups(['bed', 'rooms_and_bed'])]
     private ?string $bedShape = null;
 // topBed,bottomBed,singleBed
     #[ORM\Column]
-    #[Groups(['bed','rooms_and_bed'])]
+    #[Groups(['bed', 'rooms_and_bed'])]
     private ?bool $hasLamp = null;
 
     #[ORM\Column]
-    #[Groups(['bed','rooms_and_bed'])]
+    #[Groups(['bed', 'rooms_and_bed'])]
     private ?bool $hasLittleStorage = null;
 
     #[ORM\Column]
-    #[Groups(['bed','rooms_and_bed'])]
+    #[Groups(['bed', 'rooms_and_bed'])]
     private ?bool $hasShelf = null;
 
     /**
      * @var Collection<int, Booking>
      */
     #[ORM\ManyToMany(targetEntity: Booking::class, mappedBy: 'beds')]
+    #[Groups(['bed', 'rooms_and_bed'])]
     private Collection $bookings;
 
     #[ORM\Column]
@@ -79,7 +80,8 @@ class Bed
     {
         $this->bookings = new ArrayCollection();
     }
-   //topBed - bottomBed - singleBed
+
+    //topBed - bottomBed - singleBed
 
     public function getId(): ?int
     {
@@ -173,6 +175,18 @@ class Bed
     public function getBedShape(): ?string
     {
         return $this->bedShape;
+    }
+
+
+    #[Groups(['bed','rooms_and_bed'])]
+    public function getCurrentBooking()
+    {
+        foreach ($this->bookings as $booking) {
+            if ($booking->getStartDate() <= new \DateTime() && new \DateTime() <= $booking->getEndDate()) {
+                return $booking;
+            }
+        }
+        return null;
     }
 
     public function setBedShape(?string $bedShape): static

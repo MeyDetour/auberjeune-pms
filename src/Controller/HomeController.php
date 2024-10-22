@@ -44,7 +44,7 @@ class HomeController extends AbstractController
                         "roles" => [
                             "ROLE_USER"
                         ],
-                        "firstName" =>"string",
+                        "firstName" => "string",
                         "lastName" => "string",
                         "website" => "string",
                         "profession" => "string",
@@ -76,7 +76,7 @@ class HomeController extends AbstractController
                     'route' => '/api/user/edit/{id}',
                     'methode' => 'PUT',
                     'body' => [
-                        "username" =>"string",
+                        "username" => "string",
                         "firstName" => "string",
                         "lastName" => "string",
                         "website" => "string",
@@ -136,6 +136,11 @@ class HomeController extends AbstractController
                         "name" => "Room 0",
                         "hasPrivateShowerroom" => "boolean",
                         "hasLocker" => "boolean",
+                        "hasTable" => "boolean",
+                        "hasBalcony" => "boolean",
+                        "hasWashtub" => "boolean",
+                        "hasBin" => "boolean",
+                        "hasWardrobe" => "boolean",
                         "isPrivate" => "boolean",
                         "beds" => [
                             [
@@ -144,7 +149,7 @@ class HomeController extends AbstractController
                                 "state" => "inspected,notCleaned,cleaned,blocked",
                                 "number" => "int",
                                 "isDoubleBed" => "int",
-                                "isOccupied"=>"boolean",
+                                "isOccupied" => "boolean",
                                 "bedShape" => "string",
                                 "hasLamp" => "boolean",
                                 "hasLittleStorage" => "boolean",
@@ -164,6 +169,11 @@ class HomeController extends AbstractController
                     'body' => [
                         "name" => "string",
                         "hasLocker" => "boolean",
+                        "hasTable" => "boolean",
+                        "hasBalcony" => "boolean",
+                        "hasWashtub" => "boolean",
+                        "hasBin" => "boolean",
+                        "hasWardrobe" => "boolean",
                         "private" => "boolean",
                         "hasPrivateShowerroom" => "boolean"
                     ],
@@ -176,6 +186,11 @@ class HomeController extends AbstractController
                     'body' => [
                         "name" => "string",
                         "hasLocker" => "boolean",
+                        "hasTable" => "boolean",
+                        "hasBalcony" => "boolean",
+                        "hasWashtub" => "boolean",
+                        "hasBin" => "boolean",
+                        "hasWardrobe" => "boolean",
                         "private" => "boolean",
                         "hasPrivateShowerroom" => "boolean"
                     ],
@@ -201,7 +216,7 @@ class HomeController extends AbstractController
                         "state" => "string",
                         "number" => "int",
                         "isDoubleBed" => "int",
-                        "isOccupied"=>"boolean",
+                        "occupied" => "boolean",
                         "bedShape" => "string",
                         "hasLamp" => "boolean",
                         "hasLittleStorage" => "boolean",
@@ -219,6 +234,11 @@ class HomeController extends AbstractController
                             "name" => "room1",
                             "hasPrivateShowerroom" => "boolean",
                             "hasLocker" => "boolean",
+                            "hasTable" => "boolean",
+                            "hasBalcony" => "boolean",
+                            "hasWashtub" => "boolean",
+                            "hasBin" => "boolean",
+                            "hasWardrobe" => "boolean",
                             "isPrivate" => "boolean",
 
                         ]
@@ -240,13 +260,13 @@ class HomeController extends AbstractController
                         "state" => "cleaned,inspected,notCleaned,blocked",
                         "room" => "int"
                     ],
-                    'sendBack' => ['message'=>"ok"],
+                    'sendBack' => ['message' => "ok"],
                     'token' => true
                 ], [
                     'name' => 'Edit bed',
                     'route' => '/api/bed/edit/{id}',
                     'methode' => 'PUT',
-                    'body' =>  [
+                    'body' => [
                         "number" => "int",
                         "doubleBed" => "boolean",
                         "dunkBed" => "boolean",
@@ -263,7 +283,7 @@ class HomeController extends AbstractController
                         "state" => "inspected",
                         "number" => "int",
                         "isDoubleBed" => "int",
-                        "isOccupied"=>"boolean",
+                        "isOccupied" => "boolean",
                         "bedShape" => "string",
                         "hasLamp" => "boolean",
                         "hasLittleStorage" => "boolean",
@@ -281,6 +301,11 @@ class HomeController extends AbstractController
                             "name" => "room1",
                             "hasPrivateShowerroom" => "boolean",
                             "hasLocker" => "boolean",
+                            "hasTable" => "boolean",
+                            "hasBalcony" => "boolean",
+                            "hasWashtub" => "boolean",
+                            "hasBin" => "boolean",
+                            "hasWardrobe" => "boolean",
                             "isPrivate" => "boolean",
 
                         ]
@@ -316,12 +341,179 @@ class HomeController extends AbstractController
                     ],
                     'sendBack' => "ok if it's done",
                     'token' => true
-                ],[
+                ], [
                     'name' => 'Toggle occupied state of bed ',
                     'route' => '/bed/{id}/change/occupation',
                     'methode' => 'PATCH',
-                    'body' => [ ],
+                    'body' => [],
                     'sendBack' => "ok if it's done",
+                    'token' => true
+                ],
+            ],
+
+            "Booking" => [
+                [
+                    'name' => 'to book',
+                    'route' => '/booking/new',
+                    'methode' => 'POST',
+                    'body' => [
+
+                        "startDate" => "2022-12-03 12:00",
+                        "endDate" => "2023-12-05 12:00",
+                        "phoneNumber" => "07 82 40 50 80",
+                        "mail" => "07 82 40 80 49",
+                        "clients" => [
+                            ["firstName" => "Mey", "lastName" => "DETOUR", "birthDate" => "2015-12-03 00:00"],
+                            ["firstName" => "Maxence", "lastName" => "Abrile", "birthDate" => "2002-12-03 00:00"]
+                        ],
+                    ],
+                    'sendBack' => "booking",
+                    'token' => true
+                ], [
+                    'name' => 'edit book',
+                    'route' => '/booking/edit/{id}',
+                    'methode' => 'PUT',
+                    'body' => [
+                        "startDate" => "2022-12-03 12:00",
+                        "endDate" => "2023-12-05 12:00",
+                        "phoneNumber" => "07 82 40 50 80",
+                        "finished" => "boolean",
+                        "paid" => "boolean",
+                        "advencement" => "string",
+                        "clients" => [
+                            ["firstName" => "Mey", "lastName" => "DETOUR", "birthDate" => "2015-12-03 00:00"],
+                            ["firstName" => "Maxence", "lastName" => "Abrile", "birthDate" => "2002-12-03 00:00"]
+                        ],
+                    ],
+                    'sendBack' => "booking",
+                    'token' => true
+                ], [
+                    'name' => 'finish booking ',
+                    'route' => '/booking/finish/{id}',
+                    'methode' => 'PATCH',
+                    'body' => [],
+                    'sendBack' => "ok if it's done",
+                    'token' => true
+                ],
+                [
+                    'name' => 'gat all bookings ',
+                    'route' => '/bookings/get/all',
+                    'methode' => 'GET',
+                    'body' => [],
+                    'sendBack' => [
+                        "id" => "int",
+                        "startDate" => "datetime",
+                        "endDate" => "datetime",
+                        "createdAt" => "datetime",
+                        "phoneNumber" => "string",
+                        "mail" => "string",
+                        "price" => "int",
+                        "isFinished" => "boolean",
+                        "isPaid" => "boolean",
+                        "advencement" => "string",
+                        "clients" => [
+                            [
+                                "firstName" => "string",
+                                "lastName" => "string",
+                                "birthDate" => "datetime"
+                            ],
+                            [
+                                "firstName" => "string",
+                                "lastName" => "string",
+                                "birthDate" => "datetime"
+                            ]
+                        ]
+                    ],
+                    'token' => true
+                ],[
+                    'name' => 'gat all waiting ',
+                    'route' => '/bookings/get/waiting',
+                    'methode' => 'GET',
+                    'body' => [],
+                    'sendBack' => [
+                        "id" => "int",
+                        "startDate" => "datetime",
+                        "endDate" => "datetime",
+                        "createdAt" => "datetime",
+                        "phoneNumber" => "string",
+                        "mail" => "string",
+                        "price" => "int",
+                        "isFinished" => "boolean",
+                        "isPaid" => "boolean",
+                        "advencement" => "string",
+                        "clients" => [
+                            [
+                                "firstName" => "string",
+                                "lastName" => "string",
+                                "birthDate" => "datetime"
+                            ],
+                            [
+                                "firstName" => "string",
+                                "lastName" => "string",
+                                "birthDate" => "datetime"
+                            ]
+                        ]
+                    ],
+                    'token' => true
+                ],[
+                    'name' => 'gat all in progress ',
+                    'route' => '/bookings/get/progress',
+                    'methode' => 'GET',
+                    'body' => [],
+                    'sendBack' => [
+                        "id" => "int",
+                        "startDate" => "datetime",
+                        "endDate" => "datetime",
+                        "createdAt" => "datetime",
+                        "phoneNumber" => "string",
+                        "mail" => "string",
+                        "price" => "int",
+                        "isFinished" => "boolean",
+                        "isPaid" => "boolean",
+                        "advencement" => "string",
+                        "clients" => [
+                            [
+                                "firstName" => "string",
+                                "lastName" => "string",
+                                "birthDate" => "datetime"
+                            ],
+                            [
+                                "firstName" => "string",
+                                "lastName" => "string",
+                                "birthDate" => "datetime"
+                            ]
+                        ]
+                    ],
+                    'token' => true
+                ],[
+                    'name' => 'gat all done ',
+                    'route' => '/bookings/get/done',
+                    'methode' => 'GET',
+                    'body' => [],
+                    'sendBack' => [
+                        "id" => "int",
+                        "startDate" => "datetime",
+                        "endDate" => "datetime",
+                        "createdAt" => "datetime",
+                        "phoneNumber" => "string",
+                        "mail" => "string",
+                        "price" => "int",
+                        "isFinished" => "boolean",
+                        "isPaid" => "boolean",
+                        "advencement" => "string",
+                        "clients" => [
+                            [
+                                "firstName" => "string",
+                                "lastName" => "string",
+                                "birthDate" => "datetime"
+                            ],
+                            [
+                                "firstName" => "string",
+                                "lastName" => "string",
+                                "birthDate" => "datetime"
+                            ]
+                        ]
+                    ],
                     'token' => true
                 ],
             ]
