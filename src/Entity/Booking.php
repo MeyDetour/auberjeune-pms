@@ -66,7 +66,7 @@ class Booking
     #[ORM\Column(length: 255)]
     #[Groups(['entireBooking'])]
     private ?string $advencement = null;
-
+    //refund,progress,done,waiting
 
     /**
      * @var Collection<int, Client>
@@ -77,7 +77,6 @@ class Booking
 
     #[ORM\Column]
     private ?bool $wantPrivateRoom = null;
-    //refund,progress,done,waiting
 
     public function __construct()
     {    $this->beds = new ArrayCollection();

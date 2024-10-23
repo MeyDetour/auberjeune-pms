@@ -223,13 +223,12 @@ class BookingController extends AbstractController
         if ($booking->getStartDate() >= $booking->getEndDate()) {
             return $this->json(["message" => "start date must be inferior as end start date.", 406]);
         }
-        if ($booking->getWantPrivateRoom() == null) {
+        if ($booking->getWantPrivateRoom()!= true && $booking->getWantPrivateRoom()!= false) {
             return $this->json(["message" => "Client wants private room ?", 406]);
         }
 
         /*   if (new \DateTime() >= $booking->getStartDate()) {
-               return $this->json(["message" => "Start date must be in the future", 406]);
-           }*/
+               return $this->json(["message" => "Start date must be in the future", 406]);}*/
 
         $isThereMajor = false;
         $today = new Datetime();
